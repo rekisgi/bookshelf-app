@@ -9,11 +9,35 @@ use App\Models\Genre;
 class BookController extends Controller
 {
     // ① 本の一覧表示
-    public function index()
+   // ① 本の一覧表示（検索・絞り込み対応）
+    public function index(Request $request)
     {
-        // リレーション（genres）も一緒に読み込んでおくと表示が軽くなるよ
-        $books = Book::with('genres')->latest()->get();
-        return view('books.index', compact('books'));
+        // クエリビルダの準備 ＆ リレーション（genres）のEagerロード
+        $query = Book::with('genres');
+
+        // ① キーワード検索（タイトルまたは著者名に部分一致）
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+            $query->where(function($q) use ($keyword) {
+                $q->where('title', 'like', "%{$keyword}%")
+                  ->orWhere('author', 'like', "%{$keyword}%");
+            });
+        }
+
+        // ② ジャンル絞り込み（選択されている場合）
+        if ($request->filled('genre_id')) {
+            $query->whereHas('genres', function($q) use ($request) {
+                $q->where('genres.id', $request->genre_id);
+            });
+        }
+
+        // 検索結果を取得（新しい順）
+        $books = $query->latest()->get();
+
+        // 検索用セレクトボックスで使うために全ジャンルを取得
+        $genres = Genre::all();
+
+        return view('books.index', compact('books', 'genres'));
     }
 
     // ② 本の新規登録画面の表示
