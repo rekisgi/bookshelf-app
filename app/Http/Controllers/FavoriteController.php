@@ -8,6 +8,21 @@ use Illuminate\Http\Request;
 class FavoriteController extends Controller
 {
     /**
+     * お気に入り一覧表示
+     */
+    public function index()
+    {
+        $user = auth()->user() ?? \App\Models\User::first();
+        
+        // get() を paginate() に変更してペジネーション対応
+        $books = $user 
+            ? $user->favoriteBooks()->with('genres')->latest()->paginate(9) 
+            : collect();
+
+        return view('favorites.index', compact('books'));
+    }
+
+    /**
      * お気に入り登録
      */
     public function store(Book $book)

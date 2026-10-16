@@ -19,6 +19,13 @@ class Book extends Model
         'image_url',
     ];
 
+    /**
+     * 属性のキャスト
+     */
+    protected $casts = [
+        'published_date' => 'date',
+    ];
+
     // 本を登録したユーザー（1対多の逆）
     public function user()
     {
@@ -41,5 +48,10 @@ class Book extends Model
     public function favorites()
     {
         return $this->hasMany(Favorite::class);
+    }
+
+    public function readingPlans()
+    {
+        return $this->hasMany(ReadingPlan::class);
     }
 }

@@ -1,38 +1,68 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\BookController;
-use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\FavoriteController;
-use App\Http\Controllers\LikeController;
-use App\Http\Controllers\RankingController;
 use App\Http\Controllers\GenreController;
+use App\Http\Controllers\ReviewController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReadingPlanController;
+use App\Http\Controllers\NotificationController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 */
 
-// トップページ（アクセスしたら本の一覧画面へ）
+// トップページ（/）を書籍一覧にする
 Route::get('/', [BookController::class, 'index'])->name('books.index');
 
-// 本に関するルーティング（一覧、詳細、登録、編集、削除）
-Route::resource('books', BookController::class);
+// /books にアクセスしても書籍一覧へ
+Route::get('/books', [BookController::class, 'index']);
 
-// レビュー投稿
-Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+// ランキング画面
+Route::get('/ranking', [BookController::class, 'ranking'])->name('ranking.index');
 
-// お気に入り登録・解除
-Route::post('/books/{book}/favorite', [FavoriteController::class, 'store'])->name('favorites.store');
-Route::delete('/books/{book}/favorite', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
+// Breezeのダッシュボードルート
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-// 例：ログイン画面のルートがある場合
-Route::get('/login', function () {
-    return 'ログイン画面（準備中）';
-})->name('login');
+// ログイン・認証が必要な機能
+Route::middleware('auth')->group(function () {
 
-Route::post('/reviews/{review}/like', [LikeController::class, 'store'])->name('reviews.like');
+    Route::get('/books/isbn/{isbn}', [BookController::class, 'searchByIsbn'])->name('books.isbn');
+    // 書籍関連（登録・詳細・レビュー等）
+    Route::resource('books', BookController::class)->except(['index']);
 
-Route::get('/ranking', [RankingController::class, 'index'])->name('ranking.index');
+    // レビュー投稿機能
+    Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/reviews/{review}/like', [ReviewController::class, 'like'])->name('reviews.like');
 
-Route::resource('genres', GenreController::class);
+    // お気に入り機能（一覧・登録・削除）
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+    Route::post('/books/{book}/favorites', [FavoriteController::class, 'store'])->name('favorites.store');
+    Route::delete('/books/{book}/favorites', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
+
+    // ジャンル管理機能
+    Route::resource('genres', GenreController::class);
+
+    // プロフィール管理（Breeze既存）
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // 読書レポート機能
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+    // 読書計画機能
+    Route::resource('reading-plans', ReadingPlanController::class);
+    Route::post('/reading-plans/{reading_plan}/complete', [ReadingPlanController::class, 'complete'])->name('reading-plans.complete');
+
+    // 通知機能
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+});
+
+require __DIR__.'/auth.php';

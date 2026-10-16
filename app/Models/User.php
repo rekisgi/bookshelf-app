@@ -70,9 +70,22 @@ class User extends Authenticatable
     {
         return $this->hasMany(Like::class);
     }
+
     // 5. ユーザーがお気に入り登録した本たち（多対多）
     public function favoriteBooks()
     {
         return $this->belongsToMany(Book::class, 'favorites')->withTimestamps();
+    }
+
+    // 6. ユーザーがいいねしたレビューたち（多対多）
+    public function likedReviews()
+    {
+        return $this->belongsToMany(Review::class, 'likes')->withTimestamps();
+    }
+
+    // 7. ユーザーの読書計画（1対多）
+    public function readingPlans()
+    {
+        return $this->hasMany(ReadingPlan::class);
     }
 }

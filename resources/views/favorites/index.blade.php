@@ -27,10 +27,12 @@
                                     </h3>
                                     <p class="text-gray-600 mb-2">{{ $book->author }}</p>
                                     <div class="flex items-center justify-between">
-                                        <span class="text-sm text-gray-500">ISBN: {{ $book->isbn }}</span>
-                                        <form action="{{ route('favorites.toggle', $book) }}" method="POST" novalidate>
+                                        <span class="text-sm text-gray-500">ISBN: {{ $book->isbn ?? '未登録' }}</span>
+                                        <!-- 既存のルーティング(favorites.destroy)へ適合するよう修正 -->
+                                        <form action="{{ route('favorites.destroy', $book) }}" method="POST" novalidate>
                                             @csrf
-                                            <button type="submit" class="text-red-500 hover:text-red-700">
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:text-red-700" title="お気に入りから解除">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                                                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                                                 </svg>
