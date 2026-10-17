@@ -75,13 +75,12 @@
                                 </div>
                             @endif
 
+                            <!-- 編集・削除ボタン（ログイン中の本人のみ表示） -->
                             <div class="flex gap-2 mt-4">
-                                @can('update', $book)
+                                @if (auth()->check() && auth()->id() === $book->user_id)
                                     <a href="{{ route('books.edit', $book) }}" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
                                         編集
                                     </a>
-                                @endcan
-                                @can('delete', $book)
                                     <form action="{{ route('books.destroy', $book) }}" method="POST" onsubmit="return confirm('本当に削除しますか？')" novalidate>
                                         @csrf
                                         @method('DELETE')
@@ -89,7 +88,7 @@
                                             削除
                                         </button>
                                     </form>
-                                @endcan
+                                @endif
                             </div>
                         </div>
                     </div>
