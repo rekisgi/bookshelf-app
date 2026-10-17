@@ -37,8 +37,9 @@ Route::middleware('auth')->group(function () {
     // 書籍関連（登録・詳細・レビュー等）
     Route::resource('books', BookController::class)->except(['index']);
 
-    // レビュー投稿機能
+    // レビュー機能（投稿・編集・更新・削除・いいね）
     Route::post('/books/{book}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::resource('reviews', ReviewController::class)->only(['edit', 'update', 'destroy']);
     Route::post('/reviews/{review}/like', [ReviewController::class, 'like'])->name('reviews.like');
 
     // お気に入り機能（一覧・登録・削除）
